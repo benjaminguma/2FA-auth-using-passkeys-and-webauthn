@@ -1,38 +1,70 @@
-import Head from "next/head";
-import Script from "next/script";
-import React, { useEffect } from "react";
+import React, { FormEvent, FormEventHandler, useEffect, useRef, useState } from "react";
 import * as SimpleWebAuthnBrowser from "@simplewebauthn/browser";
-import axios from "axios";
-const BASE_URI = "http://localhost:5500";
+import { useAuth } from "@/AuthProvider";
+import { useRouter } from "next/router";
 function Login() {
-	async function getAuthenticationOptions(user_name: string) {
-		const { data } = await axios.post(`${BASE_URI}/auth/login`, {
-			user_name,
-		});
-		console.log({ plokoto: data.data });
-		const regData = await SimpleWebAuthnBrowser.startAuthentication(data.data, true);
-		const verificationRes = await axios.post(`${BASE_URI}/auth/verify-login`, {
-			user_name,
-			data: regData,
-		});
-		console.log({ verificationRes });
-	}
+	const { handleDeviceAuthentication, login, user } = useAuth();
+	const [email, setEmail] = useState("");
+	const router = useRouter();
+	const passwordRef = useRef<HTMLInputElement>(null);
+	const [browserSupportsWebAuthn, setBrowserSupportsWebAuthn] = useState(false);
+
+	const e = email;
 	useEffect(() => {
-		getAuthenticationOptions("benzofx");
-	}, []);
+		if (SimpleWebAuthnBrowser.browserSupportsWebAuthn()) {
+			setBrowserSupportsWebAuthn(true);
+			handleDeviceAuthentication(email as string, true).then(
+				(isSuccessful) => isSuccessful && router.replace("profile"),
+			);
+		}
+	}, [e]);
+
+	const goToProfilePage = (isSuccessful: boolean) => isSuccessful && router.replace("profile");
+	const handleLoginPasskey: FormEventHandler<HTMLFormElement> = (e: FormEvent) => {
+		e.preventDefault();
+		return handleDeviceAuthentication(email).then(goToProfilePage);
+	};
+
+	const handleLoginBasic: FormEventHandler<HTMLFormElement> = (e: FormEvent) => {
+		e.preventDefault();
+		if (passwordRef?.current && email) {
+			const password = passwordRef.current?.value || "";
+			return login(email, password).then(goToProfilePage);
+		}
+	};
+
 	return (
-		<>
+		<form onSubmit={browserSupportsWebAuthn ? handleLoginPasskey : handleLoginBasic}>
 			<div className='grid_txt_1'>
+				<h1 className='u-center'>&lt;Login&gt;</h1>
 				<div className='grid_txt'>
 					<label htmlFor=''>email</label>
-					<input placeholder='enter username' autoComplete='webauthn' autoFocus={true} />
+					<input
+						value={email}
+						// name='email'
+						placeholder='enter your email'
+						autoComplete='username webauthn'
+						onChange={({ target: { value } }) => setEmail(value)}
+					/>
 				</div>
-				<div className='grid_txt'>
-					<label htmlFor=''>enter password</label>
-					<input type={"password"} autoComplete='webauthn' />
-				</div>
+				{browserSupportsWebAuthn ? (
+					<></>
+				) : (
+					<>
+						<div className='grid_txt'>
+							<label htmlFor=''>password</label>
+							<input
+								ref={passwordRef}
+								type='password'
+								placeholder='enter your password'
+								autoComplete='password webauthn'
+							/>
+						</div>
+					</>
+				)}
+				<button className='btn'>login</button>
 			</div>
-		</>
+		</form>
 	);
 }
 

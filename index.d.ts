@@ -1,57 +1,52 @@
 export type AuthContextType = {
-	handleDeviceRegistration(username: string): Promise<void>;
-	handleDeviceAuthentication(username: string): Promise<boolean>;
+	handleDeviceRegistration(): Promise<boolean>;
+	handleDeviceAuthentication(email: strin, useBrowserAutofill?: boolean): Promise<boolean>;
 	signOut(): void;
 	status: authStatus;
-	user: User | null;
-	signup(username: string, password: string): Promise<void>;
-	login(username: string, password: string): Promise<void>;
+	user: { email: string; id?: string };
+	signup(email: string, password: string): Promise<void>;
+	login(email: string, password: string): Promise<boolean>;
 };
 
 export type authStatus = "authenticated" | "unauthenticated" | "loading";
 
-export type User = {
-	id: string;
-	username: string;
-	password: string;
-};
+// export type User = {
+// 	id: string;
+// 	username: string;
+// 	password: string;
+// };
 
 import { VerifyAuthenticationResponseOpts } from "@simplewebauthn/server/./dist";
+import { AuthenticatorAssertionResponseJSON, AuthenticatorDevice } from "@simplewebauthn/typescript-types";
 
-export type UserOnDb = {
+export type User = {
 	id: string;
-	username: string;
+	email: string;
 	currentChallenge: string;
 	password: string;
 };
 
-export type AuthenticatorType = {
-	credentialID: Uint8Array;
-	credentialPublicKey: Uint8Array;
+export interface AuthenticatorType extends AuthenticatorDevice {
+	credentialID: Uint8Array | Array;
+	credentialPublicKey: Uint8Array | Array;
 	counter: striing;
-};
+}
 
 export type verificationPayload = {
 	data: VerifyAuthenticationResponseOpts;
 	user_id: string;
-	user_name?: string;
+	email?: string;
 };
 
 export type singleUserAuthenticator = { userId: string; authenticators: AuthenticatorType[] };
 
-export type AuthVerifyPayload = {
+export type AuthenticationAssertionPayload = {
 	data: {
 		id: string;
 		rawId: string;
-		response: {
-			authenticatorData: string;
-			clientDataJSON: string;
-			signature: string;
-			userHandle: string;
-		};
+		response: AuthenticatorAssertionResponseJSON;
 		type: string;
 		clientExtensionResults: {};
 		authenticatorAttachment: "platform";
 	};
-	user_name: string;
 };
