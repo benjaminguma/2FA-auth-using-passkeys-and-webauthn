@@ -43,7 +43,6 @@ export const AuthenticatorsService = {
 			CollectionOfUserAuthenticators.push(userAuthenticators);
 		} else CollectionOfUserAuthenticators[index] = userAuthenticators;
 
-		console.log(this.getCollectionOfUserAuthenticators());
 		writeFileSync("users-authenticators.json", JSON.stringify(CollectionOfUserAuthenticators));
 	},
 

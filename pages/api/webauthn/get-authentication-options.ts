@@ -24,11 +24,12 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 	}
 	const options = generateAuthenticationOptions({
 		allowCredentials:
-			[] ||
-			userAuthenticators.authenticators.map((a) => ({
-				id: a.credentialID,
-				type: "public-key",
-			})),
+			userAuthenticators.authenticators.length === 0
+				? []
+				: userAuthenticators.authenticators.map((a) => ({
+						id: a.credentialID,
+						type: "public-key",
+				  })),
 		userVerification: "preferred",
 		timeout: 60 * 1000 * 5, // ensures that even if attacker has
 	});

@@ -12,6 +12,17 @@ export default function App() {
 			<Link className='btn br' href={"/login"}>
 				login
 			</Link>
+			<Link
+				className=''
+				referrerPolicy='no-referrer'
+				href={"https://github.com/benjaminguma/biometrics-auth-using-passkeys-and-webauthn"}
+				style={{
+					textDecoration: "underline",
+				}}
+				target='_blank'
+			>
+				link to code on Github
+			</Link>
 		</div>
 	);
 }

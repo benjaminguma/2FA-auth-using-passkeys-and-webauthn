@@ -9,6 +9,9 @@ function Profile() {
 				congrats!! logged in as <span className='col-gold'> &lt; {user.email}&gt; </span>{" "}
 			</h1>
 			<div className='u-center'>
+				<video autoPlay loop src='/x.mp4' />
+			</div>
+			<div className='u-center'>
 				<button className='btn br ' onClick={signOut}>
 					sign out
 				</button>
